@@ -94,7 +94,7 @@ docker-compose logs -f
 3. 連結你的 GitHub 倉庫（需要把 `backend/` 獨立成一個倉庫）
 4. 設定：
    - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 4 app:app`
+   - **Start Command**: `gunicorn --bind 0.0.0.0:5000 --workers 2 --threads 4 app:app`
 
 **環境變數（在 Render Dashboard 設定）：**
 - `ADMIN_PASSWORD`: 你的管理密碼
