@@ -4,8 +4,7 @@ Flask Backend for ChromaDB Admin Panel
 """
 
 import os
-import hashlib
-from functools import wraps
+import sys
 from flask import Flask, request, jsonify, send_from_directory, render_template_string
 import chromadb
 from chromadb.config import Settings
@@ -13,13 +12,14 @@ from chromadb.config import Settings
 # ============== 初始化 ==============
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'change-me-in-production')
-app.config['ADMIN_PASSWORD'] = os.environ.get('ADMIN_PASSWORD', 'admin123')  # 生產環境請更換
+app.config['ADMIN_PASSWORD'] = os.environ.get('ADMIN_PASSWORD', 'admin123')
 
 # ============== ChromaDB 客戶端 ==============
-CHROMA_DATA_PATH = os.environ.get('CHROMA_DATA_PATH', './chromadb_data')
+CHROMA_DATA_PATH = os.environ.get('CHROMA_DATA_PATH', '/tmp/chromadb_data')
 
 def get_chroma_client():
     """取得 ChromaDB 客戶端"""
+    os.makedirs(CHROMA_DATA_PATH, exist_ok=True)
     return chromadb.PersistentClient(path=CHROMA_DATA_PATH)
 
 def get_collection(name='taipei_food'):
@@ -100,14 +100,12 @@ def get_collection_items(name):
         for i in range(min(len(docs), limit)):
             idx = offset + i
             if idx < len(docs):
-                # 過濾 None 和 ndarray 类型的 embedding
                 emb = None
                 if i < len(embs) and embs[idx] is not None:
                     try:
                         emb_list = embs[idx]
                         if hasattr(emb_list, 'tolist'):
                             emb_list = emb_list.tolist()
-                        # 只取前128維壓縮
                         if isinstance(emb_list, list) and len(emb_list) > 128:
                             emb_list = emb_list[:128]
                         emb = emb_list
@@ -151,11 +149,9 @@ def query_collection(name):
             include=['documents', 'metadatas', 'distances']
         )
         
-        # 格式化結果
         formatted = []
         if results['ids'] and len(results['ids']) > 0:
             for i in range(len(results['ids'][0])):
-                # 轉換 distance 避免 numpy 類型問題
                 dist = None
                 if results['distances'] and results['distances'][0] and i < len(results['distances'][0]):
                     try:
@@ -342,7 +338,7 @@ LOGIN_PAGE = '''
         <h1>🔐 美食資料庫管理後台</h1>
         <div class="input-group">
             <label>管理密碼</label>
-            <input type="password" id="password" placeholder="請輸入密碼" onkeypress="if(event.key==='Enter')login()">
+            <input type="password" id="password" placeholder="請輸入密碼" onkeypress="if(event.key==='\'Enter\'')login()">
         </div>
         <button class="btn" onclick="login()">登入</button>
         <p class="error" id="error">密碼錯誤</p>
@@ -352,7 +348,6 @@ LOGIN_PAGE = '''
         function login() {
             const password = document.getElementById('password').value;
             localStorage.setItem('admin_auth', password);
-            // 驗證
             fetch('/api/health', {
                 headers: { 'X-Auth-Password': password }
             }).then(r => {
@@ -377,6 +372,8 @@ def login_page():
 
 # ============== 啟動 ==============
 if __name__ == '__main__':
+    # Railway 會設定 PORT 環境變量
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    print(f"Starting server on port {port}, debug={debug}", flush=True)
     app.run(host='0.0.0.0', port=port, debug=debug)
