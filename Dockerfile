@@ -7,6 +7,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p /tmp/chromadb_data
+RUN chmod +x /app/entrypoint.sh
 
-CMD ["python", "start.py"]
+EXPOSE 5000
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "4", "app:app"]
