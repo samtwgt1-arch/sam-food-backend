@@ -185,6 +185,54 @@ TAIPEI_BUFFET_RESTAURANTS = [
     }
 ]
 
+@app.route('/api/reset', methods=['POST'])
+@require_auth
+def reset_db():
+    """刪除並重建資料庫"""
+    try:
+        client = get_chroma_client()
+        try:
+            client.delete_collection('taipei_food')
+        except:
+            pass
+        col = client.create_collection('taipei_food')
+        col.add(
+            ids=[f"r{i}" for i in range(12)],
+            documents=[
+                "探索廚房 - 評分 4.5 顆星，晚餐 NT$2,580，午餐 NT$1,980。位於台北信義區。特色：龍蝦、牛排、帝王蟹。",
+                "三燔本家 - 評分 4.6 顆星，晚餐 NT$1,499，午餐 NT$1,299。位於台北中山區。特色：龍蝦、天使紅蝦、握壽司。",
+                "台北君悅凱菲屋 - 評分 4.5 顆星，晚餐 NT$2,200，午餐 NT$1,800。位於台北信義區。特色：甜點區、各國料理。",
+                "NAGOMI - 評分 4.7 顆星，晚餐 NT$1,690，午餐 NT$1,290。位於新北板橋區。特色：港式燒臘、生魚片。",
+                "漢來海港 - 評分 4.4 顆星，晚餐 NT$1,380，午餐 NT$1,180。位於台北中山區。特色：CP值最高、分店多。",
+                "星嶼沙拉吧 - 評分 4.5 顆星，晚餐 NT$888，午餐 NT$788。位於新北三重區。特色：素食友善、創意沙拉。",
+                "涮乃葉 - 評分 4.3 顆星，晚餐 NT$768，午餐 NT$668。位於台北多家分店。特色：日式涮涮鍋、和牛。",
+                "燒肉眾 - 評分 4.2 顆星，晚餐 NT$699，午餐 NT$599。位於台北公館/板橋。特色：日式燒肉、吃到飽。",
+                "彩豐樓 - 評分 4.4 顆星，晚餐 NT$1,880，午餐 NT$1,580。位於台北中山區。特色：粵式料理、海鮮。",
+                "旭集 - 評分 4.6 顆星，晚餐 NT$1,690，午餐 NT$1,290。位於台北信義區。特色：日式料理、甜點。",
+                "十二廚 - 評分 4.3 顆星，晚餐 NT$2,000，午餐 NT$1,600。位於台北中山區。特色：各國料理、甜點。",
+                "飪室 - 評分 4.5 顆星，晚餐 NT$699，午餐 NT$599。位於新北新莊區。特色：印度料理、素食友善。"
+            ],
+            metadatas=[
+                {"name": "探索廚房", "rating": 4.5, "location": "台北信義區", "category": "頂級 Buffet"},
+                {"name": "三燔本家", "rating": 4.6, "location": "台北中山區", "category": "日式 Buffet"},
+                {"name": "台北君悅凱菲屋", "rating": 4.5, "location": "台北信義區", "category": "五星飯店"},
+                {"name": "NAGOMI", "rating": 4.7, "location": "新北板橋區", "category": "日式 Buffet"},
+                {"name": "漢來海港", "rating": 4.4, "location": "台北中山區", "category": "CP值最高"},
+                {"name": "星嶼沙拉吧", "rating": 4.5, "location": "新北三重區", "category": "素食 Buffet"},
+                {"name": "涮乃葉", "rating": 4.3, "location": "台北多家分店", "category": "日式火鍋"},
+                {"name": "燒肉眾", "rating": 4.2, "location": "台北公館", "category": "日式燒肉"},
+                {"name": "彩豐樓", "rating": 4.4, "location": "台北中山區", "category": "粵式 Buffet"},
+                {"name": "旭集", "rating": 4.6, "location": "台北信義區", "category": "日式 Buffet"},
+                {"name": "十二廚", "rating": 4.3, "location": "台北中山區", "category": "五星飯店"},
+                {"name": "飪室", "rating": 4.5, "location": "新北新莊區", "category": "異國料理"}
+            ]
+        )
+        return jsonify({'success': True, 'count': col.count()})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/init', methods=['POST'])
 @require_auth
 def init_data():
