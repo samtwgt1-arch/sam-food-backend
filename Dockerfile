@@ -7,6 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p /tmp/chromadb_data && chmod +x /app/entrypoint.sh
+RUN mkdir -p /tmp/chromadb_data && chmod +x /app/entrypoint.py
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["python", "/app/entrypoint.py"]
