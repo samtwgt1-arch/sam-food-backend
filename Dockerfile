@@ -25,5 +25,5 @@ ENV FLASK_DEBUG=false
 # 暴露端口
 EXPOSE 5000
 
-# 啟動命令（使用 gunicorn 生產環境）
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "4", "app:app"]
+# 啟動命令（使用 gunicorn 生產環境，動態讀取 Railway PORT）
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 2 --threads 4 app:app"]
