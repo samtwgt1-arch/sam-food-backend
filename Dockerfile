@@ -17,13 +17,8 @@ COPY . .
 # 創建 ChromaDB 資料目錄
 RUN mkdir -p /app/chromadb_data
 
-# 環境變數
-ENV PORT=5000
-ENV CHROMA_DATA_PATH=/app/chromadb_data
-ENV FLASK_DEBUG=false
+# 暴露端口 (Railway會映射)
+EXPOSE 8080
 
-# 暴露端口
-EXPOSE 5000
-
-# 啟動命令（使用 gunicorn 生產環境，動態讀取 Railway PORT）
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 2 --threads 4 app:app"]
+# 啟動命令
+CMD ["python", "-c", "import os; from app import app; app.run(host='0.0.0.0', port=8080)"]
