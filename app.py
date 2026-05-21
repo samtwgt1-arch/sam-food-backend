@@ -49,6 +49,200 @@ def health():
     """健康檢查"""
     return jsonify({'status': 'ok', 'chroma_path': CHROMA_DATA_PATH})
 
+# ============== 台北吃到飽餐廳資料 ==============
+TAIPEI_BUFFET_RESTAURANTS = [
+    {
+        "name": "饗饗",
+        "category": "buffet",
+        "rating": "4.8",
+        "price_range": "1500-2500",
+        "dinner_price": "2199",
+        "lunch_price": "1799",
+        "location": "台北市信義區",
+        "features": ["高空景觀", "頂級海鮮", "日式料理", "義式料理"],
+        "description": "微風信義47樓，提供高級吃到飽 buffet，景觀極佳，海鮮新鮮度高。"
+    },
+    {
+        "name": "旭集",
+        "category": "buffet",
+        "rating": "4.7",
+        "price_range": "1300-2000",
+        "dinner_price": "1999",
+        "lunch_price": "1599",
+        "location": "台北市大安區",
+        "features": ["日式料理", "龍蝦", "帝王蟹", "現做料理"],
+        "description": "以日式料理為主的 buffet，提供新鮮龍蝦、帝王蟹等高級海鮮。"
+    },
+    {
+        "name": "饗食天堂",
+        "category": "buffet",
+        "rating": "4.5",
+        "price_range": "700-1500",
+        "dinner_price": "1299",
+        "lunch_price": "899",
+        "location": "多家分店",
+        "features": ["CP值高", "多樣化料理", "甜點區"],
+        "description": "CP值極高的 buffet 選擇，料理種類多達百種，甜點區特別受歡迎。"
+    },
+    {
+        "name": "寒舍艾美探索廚房",
+        "category": "buffet",
+        "rating": "4.6",
+        "price_range": "1200-2000",
+        "dinner_price": "1880",
+        "lunch_price": "1480",
+        "location": "台北市信義區",
+        "features": ["五星飯店", "甜點區", "現做牛排", "高空景觀"],
+        "description": "寒舍艾美酒店的自助餐廳，甜點區是最大亮點，提供多種精緻糕點。"
+    },
+    {
+        "name": "君品酒店雲軒",
+        "category": "buffet",
+        "rating": "4.7",
+        "price_range": "1500-2500",
+        "dinner_price": "2180",
+        "lunch_price": "1680",
+        "location": "台北市大同區",
+        "features": ["五星飯店", "現切牛排", "龍蝦", "港式料理"],
+        "description": "君品酒店的吃到飽餐廳，現切牛排和龍蝦是招牌，港式料理也相當精緻。"
+    },
+    {
+        "name": "台北晶華酒店 aze",
+        "category": "buffet",
+        "rating": "4.8",
+        "price_range": "1800-2800",
+        "dinner_price": "2580",
+        "lunch_price": "1980",
+        "location": "台北市中山區",
+        "features": ["五星飯店", "帝王蟹", "龍蝦", "精緻甜點"],
+        "description": "台北晶華酒店的自助餐廳，提供帝王蟹、龍蝦等頂級海鮮，甜點相當精緻。"
+    },
+    {
+        "name": "Mega 50 望京樓",
+        "category": "buffet",
+        "rating": "4.5",
+        "price_range": "800-1500",
+        "dinner_price": "1399",
+        "lunch_price": "999",
+        "location": "新北市板橋區",
+        "features": ["高空景觀", "CP值高", "粵式料理", "港式燒臘"],
+        "description": "板橋高空景觀 buffet，CP值高，粵式料理和港式燒臘相當受歡迎。"
+    },
+    {
+        "name": "漢來海港",
+        "category": "buffet",
+        "rating": "4.6",
+        "price_range": "800-1500",
+        "dinner_price": "1399",
+        "lunch_price": "1099",
+        "location": "多家分店",
+        "features": ["CP值高", "海鮮多", "日式料理", "甜點"],
+        "description": "以海鮮見長的吃到飽餐廳，蝦蟹貝類種類豐富，CP值極高。"
+    },
+    {
+        "name": "豐FOOD",
+        "category": "buffet",
+        "rating": "4.4",
+        "price_range": "700-1300",
+        "dinner_price": "1199",
+        "lunch_price": "799",
+        "location": "台北市中山區",
+        "features": ["CP值高", "多樣化", "日式料理", "鐵板燒"],
+        "description": "CP值極高的 buffet，日式料理和鐵板燒都有一定水準，適合家庭聚餐。"
+    },
+    {
+        "name": "青花苑",
+        "category": "yakiniku",
+        "rating": "4.6",
+        "price_range": "1500-2500",
+        "dinner_price": "2180",
+        "lunch_price": "1680",
+        "location": "台北市大安區",
+        "features": ["頂級燒肉", "和牛", "伊比利豬", "包生菜"],
+        "description": "頂級燒肉吃到飽，提供日本和牛、伊比利豬等高級肉品，需提前預訂。"
+    },
+    {
+        "name": "燒肉天花板",
+        "category": "yakiniku",
+        "rating": "4.7",
+        "price_range": "2000-3500",
+        "dinner_price": "2980",
+        "lunch_price": "2380",
+        "location": "台北市松山區",
+        "features": ["頂級燒肉", "和牛", "帝王蟹", "龍蝦"],
+        "description": "頂級燒肉吃到飽，提供和牛、帝王蟹、龍蝦，適合慶祝特殊場合。"
+    },
+    {
+        "name": "路易莎火烤兩吃",
+        "category": "hotpot_yakiniku",
+        "rating": "4.3",
+        "price_range": "500-900",
+        "dinner_price": "799",
+        "lunch_price": "599",
+        "location": "多家分店",
+        "features": ["燒肉+火鍋", "CP值高", "多样化", "適合聚餐"],
+        "description": "燒肉+火鍋複合店，CP值高，適合想吃燒肉又想吃火鍋的人。"
+    }
+]
+
+@app.route('/api/init', methods=['POST'])
+@require_auth
+def init_data():
+    """初始化台北吃到飽餐廳資料"""
+    try:
+        client = get_chroma_client()
+        
+        # 刪除舊 collection 並重建
+        try:
+            client.delete_collection('taipei_food')
+        except:
+            pass
+        
+        col = client.create_collection('taipei_food')
+        
+        ids = []
+        embeddings = []
+        documents = []
+        metadatas = []
+        
+        for i, restaurant in enumerate(TAIPEI_BUFFET_RESTAURANTS):
+            # 每家餐廳建立多個 chunk
+            for j, chunk_text in enumerate([
+                f"{restaurant['name']} - 基本資訊：評分{restaurant['rating']}顆星，晚餐NT${restaurant['dinner_price']}，午餐NT${restaurant['lunch_price']}。位於{restaurant['location']}。特色：{', '.join(restaurant['features'])}。",
+                f"{restaurant['name']} - 介紹：{restaurant['description']}。適合{'、'.join(restaurant['features'][:2])}。",
+                f"{restaurant['name']} - 價格：晚餐 NT${restaurant['dinner_price']}，午餐 NT${restaurant['lunch_price']}。價位區間 {restaurant['price_range']}。",
+                f"{restaurant['name']} - 評論：{restaurant['rating']}分的高分餐廳，{restaurant['features'][0]}是其最大亮點。{restaurant['description']}"
+            ]):
+                ids.append(f"restaurant_{i}_chunk_{j}")
+                documents.append(chunk_text)
+                metadatas.append({
+                    "restaurant_name": restaurant["name"],
+                    "category": restaurant["category"],
+                    "rating": restaurant["rating"],
+                    "dinner_price": restaurant["dinner_price"],
+                    "lunch_price": restaurant["lunch_price"],
+                    "location": restaurant["location"],
+                    "features": ", ".join(restaurant["features"]),
+                    "chunk_index": j
+                })
+        
+        # 使用簡單的 embedding（ChromaDB 內建）
+        # 這裡我們先用空陣列，讓 ChromaDB 使用預設 embedding
+        col.add(
+            ids=ids,
+            documents=documents,
+            metadatas=metadatas
+        )
+        
+        count = col.count()
+        return jsonify({
+            'success': True,
+            'message': f'已初始化 {len(TAIPEI_BUFFET_RESTAURANTS)} 家餐廳，共 {count} 筆資料'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/collections')
 @require_auth
 def list_collections():
