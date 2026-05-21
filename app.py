@@ -191,70 +191,100 @@ def init_data():
     """初始化台北吃到飽餐廳資料"""
     import sys
     print('START init_data', flush=True)
-    sys.stdout.flush()
     try:
         client = get_chroma_client()
         print('Got client', flush=True)
         
-        # 刪除舊 collection 並重建
+        # 刪除舊 collection
         try:
             client.delete_collection('taipei_food')
-            print('Deleted old collection', flush=True)
+            print('Deleted', flush=True)
         except Exception as e:
-            print(f'Delete error: {e}', flush=True)
-            pass
+            print(f'Delete err: {e}', flush=True)
         
+        # 建立 collection（不指定 embedding function）
         col = client.create_collection('taipei_food')
-        print('Created collection', flush=True)
+        print('Created', flush=True)
         
-        ids = []
-        documents = []
-        metadatas = []
+        # 只加入最基本的 12 筆記錄（每家餐廳 1 筆濃縮資訊）
+        sample_restaurants = [
+            {
+                "id": "r0",
+                "doc": "探索廚房 - 評分 4.5 顆星，晚餐 NT$2,580，午餐 NT$1,980。位於台北信義區。特色：龍蝦、牛排、帝王蟹。",
+                "meta": {"name": "探索廚房", "rating": 4.5, "location": "台北信義區", "category": "頂級 Buffet"}
+            },
+            {
+                "id": "r1",
+                "doc": "三燔本家 - 評分 4.6 顆星，晚餐 NT$1,499，午餐 NT$1,299。位於台北中山區。特色：龍蝦、天使紅蝦、握壽司。",
+                "meta": {"name": "三燔本家", "rating": 4.6, "location": "台北中山區", "category": "日式 Buffet"}
+            },
+            {
+                "id": "r2",
+                "doc": "台北君悅凱菲屋 - 評分 4.5 顆星，晚餐 NT$2,200，午餐 NT$1,800。位於台北信義區。特色：甜點區、 各國料理。",
+                "meta": {"name": "台北君悅凱菲屋", "rating": 4.5, "location": "台北信義區", "category": "五星飯店"}
+            },
+            {
+                "id": "r3",
+                "doc": "NAGOMI - 評分 4.7 顆星，晚餐 NT$1,690，午餐 NT$1,290。位於新北板橋區。特色：港式燒臘、生魚片。",
+                "meta": {"name": "NAGOMI", "rating": 4.7, "location": "新北板橋區", "category": "日式 Buffet"}
+            },
+            {
+                "id": "r4",
+                "doc": "漢來海港 - 評分 4.4 顆星，晚餐 NT$1,380，午餐 NT$1,180。位於台北中山區/敦化北路。特色：CP值最高、分店多。",
+                "meta": {"name": "漢來海港", "rating": 4.4, "location": "台北中山區", "category": "CP值最高"}
+            },
+            {
+                "id": "r5",
+                "doc": "星嶼沙拉吧 - 評分 4.5 顆星，晚餐 NT$888，午餐 NT$788。位於新北三重區。特色：素食友善、創意沙拉。",
+                "meta": {"name": "星嶼沙拉吧", "rating": 4.5, "location": "新北三重區", "category": "素食 Buffet"}
+            },
+            {
+                "id": "r6",
+                "doc": "涮乃葉 - 評分 4.3 顆星，晚餐 NT$768，午餐 NT$668。位於台北多家分店。特色：日式涮涮鍋、和牛。",
+                "meta": {"name": "涮乃葉", "rating": 4.3, "location": "台北多家分店", "category": "日式火鍋"}
+            },
+            {
+                "id": "r7",
+                "doc": "燒肉眾 - 評分 4.2 顆星，晚餐 NT$699，午餐 NT$599。位於台北公館/板橋。特色：日式燒肉、吃到飽。",
+                "meta": {"name": "燒肉眾", "rating": 4.2, "location": "台北公館", "category": "日式燒肉"}
+            },
+            {
+                "id": "r8",
+                "doc": "彩豐樓 - 評分 4.4 顆星，晚餐 NT$1,880，午餐 NT$1,580。位於台北中山區。特色：粵式料理、海鮮。",
+                "meta": {"name": "彩豐樓", "rating": 4.4, "location": "台北中山區", "category": "粵式 Buffet"}
+            },
+            {
+                "id": "r9",
+                "doc": "旭集 - 評分 4.6 顆星，晚餐 NT$1,690，午餐 NT$1,290。位於台北信義區。特色：日式料理、甜點。",
+                "meta": {"name": "旭集", "rating": 4.6, "location": "台北信義區", "category": "日式 Buffet"}
+            },
+            {
+                "id": "r10",
+                "doc": "十二廚 - 評分 4.3 顆星，晚餐 NT$2,000，午餐 NT$1,600。位於台北中山區。特色：各國料理、甜點。",
+                "meta": {"name": "十二廚", "rating": 4.3, "location": "台北中山區", "category": "五星飯店"}
+            },
+            {
+                "id": "r11",
+                "doc": "飪室 - 評分 4.5 顆星，晚餐 NT$699，午餐 NT$599。位於新北新莊區。特色：印度料理、素食友善。",
+                "meta": {"name": "飪室", "rating": 4.5, "location": "新北新莊區", "category": "異國料理"}
+            }
+        ]
         
-        for i, restaurant in enumerate(TAIPEI_BUFFET_RESTAURANTS):
-            # 每家餐廳建立多個 chunk
-            for j, chunk_text in enumerate([
-                f"{restaurant['name']} - 基本資訊：評分{restaurant['rating']}顆星，晚餐NT${restaurant['dinner_price']}，午餐NT${restaurant['lunch_price']}。位於{restaurant['location']}。特色：{', '.join(restaurant['features'])}。",
-                f"{restaurant['name']} - 介紹：{restaurant['description']}。適合{'、'.join(restaurant['features'][:2])}。",
-                f"{restaurant['name']} - 價格：晚餐 NT${restaurant['dinner_price']}，午餐 NT${restaurant['lunch_price']}。價位區間 {restaurant['price_range']}。",
-                f"{restaurant['name']} - 評論：{restaurant['rating']}分的高分餐廳，{restaurant['features'][0]}是其最大亮點。{restaurant['description']}"
-            ]):
-                ids.append(f"restaurant_{i}_chunk_{j}")
-                documents.append(chunk_text)
-                metadatas.append({
-                    "restaurant_name": restaurant["name"],
-                    "category": restaurant["category"],
-                    "rating": restaurant["rating"],
-                    "dinner_price": restaurant["dinner_price"],
-                    "lunch_price": restaurant["lunch_price"],
-                    "location": restaurant["location"],
-                    "features": ", ".join(restaurant["features"]),
-                    "chunk_index": j
-                })
+        print(f'Adding {len(sample_restaurants)} items', flush=True)
+        ids = [r["id"] for r in sample_restaurants]
+        docs = [r["doc"] for r in sample_restaurants]
+        metas = [r["meta"] for r in sample_restaurants]
+        col.add(ids=ids, documents=docs, metadatas=metas)
+        print(f'Added, count={col.count()}', flush=True)
         
-        # 分批添加数据，每批 4 个 chunks
-        print(f'Adding {len(ids)} items in batches', flush=True)
-        batch_size = 4
-        for batch_start in range(0, len(ids), batch_size):
-            batch_ids = ids[batch_start:batch_start + batch_size]
-            batch_docs = documents[batch_start:batch_start + batch_size]
-            batch_metas = metadatas[batch_start:batch_start + batch_size]
-            print(f'  Adding batch {batch_start//batch_size + 1}...', flush=True)
-            col.add(
-                ids=batch_ids,
-                documents=batch_docs,
-                metadatas=batch_metas
-            )
-            print(f'  Batch done', flush=True)
-        
-        count = col.count()
-        print(f'Init complete: {count} items', flush=True)
         return jsonify({
             'success': True,
-            'message': f'已初始化 {len(TAIPEI_BUFFET_RESTAURANTS)} 家餐廳，共 {count} 筆資料'
+            'message': f'已初始化 {len(sample_restaurants)} 家餐廳，共 {col.count()} 筆資料'
         })
         
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/collections')
