@@ -202,9 +202,17 @@ def init_data():
         except Exception as e:
             print(f'Delete err: {e}', flush=True)
         
-        # 建立 collection（不指定 embedding function）
-        col = client.create_collection('taipei_food')
-        print('Created', flush=True)
+        # 建立或取得 collection
+        try:
+            col = client.create_collection('taipei_food')
+            print('Created', flush=True)
+        except Exception:
+            col = client.get_collection('taipei_food')
+            if col.count() > 0:
+                all_data = col.get()
+                if all_data and 'ids' in all_data:
+                    col.delete(ids=all_data['ids'])
+            print('Got existing', flush=True)
         
         # 只加入最基本的 12 筆記錄（每家餐廳 1 筆濃縮資訊）
         sample_restaurants = [
