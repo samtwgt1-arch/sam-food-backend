@@ -9,4 +9,4 @@ COPY . .
 
 RUN mkdir -p /tmp/chromadb_data
 
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 4 app:app"]
+CMD ["python", "start.py"]
