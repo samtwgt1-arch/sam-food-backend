@@ -1,18 +1,10 @@
 version: '3.8'
 
 services:
-  chroma-admin:
+  app:
     build: .
     ports:
       - "5000:5000"
     environment:
-      - PORT=5000
-      - CHROMA_DATA_PATH=/app/chromadb_data
       - ADMIN_PASSWORD=admin123
-      - FLASK_DEBUG=false
-    volumes:
-      - chroma-data:/app/chromadb_data
     restart: unless-stopped
-
-volumes:
-  chroma-data:
