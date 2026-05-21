@@ -5,6 +5,7 @@ Flask Backend for ChromaDB Admin Panel
 
 import os
 import sys
+from functools import wraps
 from flask import Flask, request, jsonify, send_from_directory, render_template_string
 import chromadb
 from chromadb.config import Settings
