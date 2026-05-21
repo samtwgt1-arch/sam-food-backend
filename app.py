@@ -226,13 +226,17 @@ def init_data():
                     "chunk_index": j
                 })
         
-        # 使用簡單的 embedding（ChromaDB 內建）
-        # 這裡我們先用空陣列，讓 ChromaDB 使用預設 embedding
-        col.add(
-            ids=ids,
-            documents=documents,
-            metadatas=metadatas
-        )
+        # 分批添加数据，每批 4 个 chunks
+        batch_size = 4
+        for batch_start in range(0, len(ids), batch_size):
+            batch_ids = ids[batch_start:batch_start + batch_size]
+            batch_docs = documents[batch_start:batch_start + batch_size]
+            batch_metas = metadatas[batch_start:batch_start + batch_size]
+            col.add(
+                ids=batch_ids,
+                documents=batch_docs,
+                metadatas=batch_metas
+            )
         
         count = col.count()
         return jsonify({
