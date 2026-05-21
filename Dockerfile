@@ -9,4 +9,4 @@ COPY . .
 
 RUN mkdir -p /tmp/chromadb_data
 
-CMD gunicorn --bind 0.0.0.0:5000 --workers 2 --threads 4 app:app
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "4", "app:app"]
