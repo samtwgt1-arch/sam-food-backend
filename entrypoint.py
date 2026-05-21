@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-import os
 import subprocess
 
-port = os.environ.get("PORT", "5000")
-print(f"Starting on port {port}")
+print("Starting gunicorn on port 5000")
 subprocess.run([
-    "gunicorn", "--bind", f"0.0.0.0:{port}", "--workers", "2", "--threads", "4", "app:app"
+    "gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "4", "app:app"
 ])
