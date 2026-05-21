@@ -189,19 +189,25 @@ TAIPEI_BUFFET_RESTAURANTS = [
 @require_auth
 def init_data():
     """初始化台北吃到飽餐廳資料"""
+    import sys
+    print('START init_data', flush=True)
+    sys.stdout.flush()
     try:
         client = get_chroma_client()
+        print('Got client', flush=True)
         
         # 刪除舊 collection 並重建
         try:
             client.delete_collection('taipei_food')
-        except:
+            print('Deleted old collection', flush=True)
+        except Exception as e:
+            print(f'Delete error: {e}', flush=True)
             pass
         
         col = client.create_collection('taipei_food')
+        print('Created collection', flush=True)
         
         ids = []
-        embeddings = []
         documents = []
         metadatas = []
         
@@ -227,18 +233,22 @@ def init_data():
                 })
         
         # 分批添加数据，每批 4 个 chunks
+        print(f'Adding {len(ids)} items in batches', flush=True)
         batch_size = 4
         for batch_start in range(0, len(ids), batch_size):
             batch_ids = ids[batch_start:batch_start + batch_size]
             batch_docs = documents[batch_start:batch_start + batch_size]
             batch_metas = metadatas[batch_start:batch_start + batch_size]
+            print(f'  Adding batch {batch_start//batch_size + 1}...', flush=True)
             col.add(
                 ids=batch_ids,
                 documents=batch_docs,
                 metadatas=batch_metas
             )
+            print(f'  Batch done', flush=True)
         
         count = col.count()
+        print(f'Init complete: {count} items', flush=True)
         return jsonify({
             'success': True,
             'message': f'已初始化 {len(TAIPEI_BUFFET_RESTAURANTS)} 家餐廳，共 {count} 筆資料'
