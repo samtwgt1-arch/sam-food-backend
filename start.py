@@ -2,17 +2,7 @@
 import os
 import subprocess
 
-port = os.environ.get("PORT")
-if port:
-    print(f"Starting on port {port} (from PORT env)")
-else:
-    port = "5000"
-    print(f"Starting on port {port} (default)")
+port = os.environ.get("PORT", "5000")
+print(f"Starting gunicorn on port {port}", flush=True)
 
-subprocess.run([
-    "gunicorn",
-    "--bind", f"0.0.0.0:{port}",
-    "--workers", "2",
-    "--threads", "4",
-    "app:app"
-])
+subprocess.run(f"gunicorn --bind 0.0.0.0:{port} --workers 2 --threads 4 app:app", shell=True)
