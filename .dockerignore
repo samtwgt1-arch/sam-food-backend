@@ -1,8 +1,4 @@
-.git
-.gitignore
-*.md
-docker-compose.yml
-DEPLOY.md
 __pycache__
+.git
 *.pyc
-.pytest_cache
+.DS_Store
