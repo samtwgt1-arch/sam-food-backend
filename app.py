@@ -720,5 +720,9 @@ if __name__ == '__main__':
     # Railway 會設定 PORT 環境變量
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    init_data_on_startup()  # 啟動時初始化資料
     print(f"Starting server on port {port}, debug={debug}", flush=True)
     app.run(host='0.0.0.0', port=port, debug=debug)
+
+# Gunicorn 啟動時也需要初始化
+init_data_on_startup()
