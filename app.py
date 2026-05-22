@@ -78,9 +78,6 @@ def init_data_on_startup():
         traceback.print_exc()
         print(f'Init failed: {e}', flush=True)
 
-# 在模組載入時執行初始化（在 gunicorn master process 中）
-init_data_on_startup()
-
 # ============== 認證裝飾器 ==============
 def require_auth(f):
     """簡單的密碼保護裝飾器"""
@@ -724,5 +721,5 @@ if __name__ == '__main__':
     print(f"Starting server on port {port}, debug={debug}", flush=True)
     app.run(host='0.0.0.0', port=port, debug=debug)
 
-# Gunicorn 啟動時也需要初始化
-init_data_on_startup()
+# Gunicorn 啟動時由 entrypoint.sh 呼叫 init_data_on_startup()
+# (模組載入時不執行，避免 worker 啟動超時)

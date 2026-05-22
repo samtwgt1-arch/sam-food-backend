@@ -1,11 +1,10 @@
 #!/bin/bash
-# Copy pre-seeded ChromaDB data to ephemeral /tmp
-if [ ! -f "/tmp/chromadb_data/chroma.sqlite3" ]; then
-    echo "Initializing ChromaDB from embedded data..."
-    cp -r /app/chromadb_data /tmp/chromadb_data
-    echo "ChromaDB initialized."
-else
-    echo "ChromaDB data already exists."
-fi
+set -e
 
-exec "$@"
+echo "=== [entrypoint] Starting initialization ==="
+
+# 初始化資料庫（會觸發 ChromaDB 嵌入模型下載 + 寫入 12 家餐廳資料）
+python /app/init_db.py
+
+echo "=== [entrypoint] Starting gunicorn ==="
+exec gunicorn --bind 0.0.0.0:5000 --workers 2 --threads 4 --timeout 120 app:app
